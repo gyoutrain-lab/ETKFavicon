@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETK Favicon & Thumbnail Installer</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#0b1220;
+    color:#fff;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:24px;
+}
+.card{
+    background:#111827;
+    border:1px solid #1f2937;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+}
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+input[type="text"], textarea{
+    width:100%;
+    background:#0b1220;
+    border:1px solid #334155;
+    color:#fff;
+    border-radius:10px;
+    padding:12px;
+    box-sizing:border-box;
+}
+textarea{
+    min-height:220px;
+    resize:vertical;
+}
+button{
+    background:#14b8a6;
+    border:none;
+    color:#fff;
+    padding:12px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-right:10px;
+}
+.preview{
+    background:#0b1220;
+    border:1px solid #334155;
+    border-radius:14px;
+    overflow:hidden;
+}
+.preview img{
+    width:100%;
+    aspect-ratio:1200/630;
+    object-fit:contain;
+    background:#0b1220;
+}
+.preview .content{
+    padding:16px;
+}
+.small{
+    color:#94a3b8;
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h2>ETK Favicon & Thumbnail Installer</h2>
+        <p class="small">
+            Install favicon + Open Graph thumbnail directly into index.html for GitHub Pages.
+        </p>
+    </div>
+
+    <div class="card">
+        <label>GitHub Pages URL</label>
+        <input type="text" id="siteUrl"
+               value="https://gyoutrain-lab.github.io/EETKInsight/">
+    </div>
+
+    <div class="card">
+        <label>Logo file name</label>
+        <input type="text" id="logoFile"
+               value="ETKFReelancer_Logo.png">
+    </div>
+
+    <div class="card">
+        <label>Import Logo (optional preview)</label>
+        <input type="file" id="logoInput" accept="image/*">
+    </div>
+
+    <div class="card preview">
+        <img id="previewImg">
+        <div class="content">
+            <strong>EETKInsight</strong>
+            <div class="small">
+                Enterprise insight, SEO intelligence, and digital performance platform.
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <label>Paste your index.html here</label>
+        <textarea id="htmlInput"
+                  placeholder="Paste your full index.html here..."></textarea>
+    </div>
+
+    <div class="card">
+        <button onclick="patchHtml()">Pasang Thumbnail & Favicon</button>
+        <button onclick="copyOutput()">Copy Hasil</button>
+        <button onclick="downloadHtml()">Download index.html</button>
+    </div>
+
+    <div class="card">
+        <label>index.html siap deploy</label>
+        <textarea id="htmlOutput"></textarea>
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById('logoInput').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(ev){
+        document.getElementById('previewImg').src = ev.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+function patchHtml(){
+
+    let html = document.getElementById('htmlInput').value;
+
+    if(!html){
+        alert('Paste index.html first');
+        return;
+    }
+
+    const base = document.getElementById('siteUrl').value.trim();
+
+    const logo = base + document.getElementById('logoFile').value.trim();
+
+    const tags = `
+<link rel="canonical" href="${base}">
+
+<link rel="icon" type="image/png" href="${logo}">
+
+<meta property="og:url" content="${base}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EETKInsight | Enterprise Insight Platform">
+<meta property="og:description" content="Enterprise insight, SEO intelligence, and digital performance platform.">
+<meta property="og:image" content="${logo}">
+<meta property="og:image:secure_url" content="${logo}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${logo}">
+`;
+
+    if(html.includes('</head>')){
+        html = html.replace('</head>', tags + '\n</head>');
+    }else{
+        html = tags + '\n' + html;
+    }
+
+    document.getElementById('htmlOutput').value = html;
+
+    alert('Thumbnail dan favicon berhasil dipasang');
+}
+
+function copyOutput(){
+    navigator.clipboard.writeText(
+        document.getElementById('htmlOutput').value
+    );
+    alert('Hasil dicopy');
+}
+
+function downloadHtml(){
+
+    const content = document.getElementById('htmlOutput').value;
+
+    const blob = new Blob([content], {type:'text/html'});
+
+    const a = document.createElement('a');
+
+    a.href = URL.createObjectURL(blob);
+
+    a.download = 'index.html';
+
+    a.click();
+}
+</script>
+
+</body>
+</html>
